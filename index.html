@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业级数据可视化看板</title>
+    <!-- 引入Chart.js库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入Font Awesome图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 引入CSS样式文件 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 粒子背景容器 -->
+    <div id="particles-js"></div>
+    
+    <!-- 全屏切换按钮 -->
+    <button class="btn-fullscreen" id="fullscreenBtn" title="切换全屏">
+        <i class="fas fa-expand"></i>
+    </button>
+    
+    <!-- 页面容器 -->
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1 class="title">数据监控中心</h1>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li class="nav-item active">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-home"></i>
+                                <span>首页</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-users"></i>
+                                <span>用户分析</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>销售数据</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="fas fa-cog"></i>
+                                <span>设置</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="header-right">
+                <!-- 数据刷新按钮 -->
+                <button class="btn-refresh" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>刷新数据</span>
+                </button>
+                
+                <!-- 时间范围选择器 -->
+                <div class="time-range">
+                    <select id="timeRangeSelect">
+                        <option value="7d">近7天</option>
+                        <option value="30d">近30天</option>
+                        <option value="90d">近90天</option>
+                        <option value="1y">近1年</option>
+                    </select>
+                </div>
+                
+                <!-- 状态指示器 -->
+                <div class="status-indicators">
+                    <div class="status-item online">
+                        <i class="fas fa-circle"></i>
+                        <span>系统正常</span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-server"></i>
+                        <span>服务器负载: 45%</span>
+                    </div>
+                </div>
+                
+                <!-- 实时时间 -->
+                <div class="time" id="currentTime"></div>
+            </div>
+        </header>
+
+        <!-- 主体内容区域 -->
+        <main class="dashboard">
+            <!-- 首页内容 -->
+            <div id="home-page" class="page active">
+                <!-- 关键指标概览 -->
+                <section class="overview-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>关键指标概览</span>
+                    </h2>
+                    
+                    <div class="metrics-grid">
+                        <!-- 指标卡片1：活跃用户 -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <h3 class="metric-title">活跃用户</h3>
+                                <span class="metric-trend up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    12.5%
+                                </span>
+                            </div>
+                            <div class="metric-body">
+                                <div class="metric-value" id="activeUsers">0</div>
+                                <div class="metric-desc">较昨日增长</div>
+                            </div>
+                            <div class="metric-footer">
+                                <i class="fas fa-users"></i>
+                                <span>实时数据</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 指标卡片2：今日新增用户 -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <h3 class="metric-title">今日新增用户</h3>
+                                <span class="metric-trend up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    8.2%
+                                </span>
+                            </div>
+                            <div class="metric-body">
+                                <div class="metric-value" id="newUsers">0</div>
+                                <div class="metric-desc">较昨日增长</div>
+                            </div>
+                            <div class="metric-footer">
+                                <i class="fas fa-user-plus"></i>
+                                <span>实时数据</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 指标卡片3：累计交易额 -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <h3 class="metric-title">累计交易额</h3>
+                                <span class="metric-trend up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    18.7%
+                                </span>
+                            </div>
+                            <div class="metric-body">
+                                <div class="metric-value" id="totalAmount">0</div>
+                                <div class="metric-desc">较昨日增长</div>
+                            </div>
+                            <div class="metric-footer">
+                                <i class="fas fa-dollar-sign"></i>
+                                <span>实时数据</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 指标卡片4：转化率 -->
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <h3 class="metric-title">转化率</h3>
+                                <span class="metric-trend down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    2.1%
+                                </span>
+                            </div>
+                            <div class="metric-body">
+                                <div class="metric-value" id="conversionRate">0.00%</div>
+                                <div class="metric-desc">较昨日下降</div>
+                            </div>
+                            <div class="metric-footer">
+                                <i class="fas fa-percentage"></i>
+                                <span>实时数据</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 图表展示区域 -->
+                <section class="charts-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>数据可视化分析</span>
+                    </h2>
+                    
+                    <div class="charts-grid">
+                        <!-- 卡片1：近7天用户访问量趋势（折线图） -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>近7天用户访问量趋势</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="visitChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 卡片2：用户来源渠道占比（饼图） -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>用户来源渠道占比</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="sourceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 卡片3：用户地域分布（柱状图） -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>用户地域分布</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="regionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 卡片4：销售趋势分析（面积图） -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>销售趋势分析</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="salesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- 系统监控区域 -->
+                <section class="monitor-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>系统监控</span>
+                    </h2>
+                    
+                    <div class="monitor-grid">
+                        <!-- 系统状态卡片 -->
+                        <div class="card monitor-card">
+                            <div class="card-header">
+                                <h3>系统运行状态</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="status-grid">
+                                    <div class="status-item">
+                                        <div class="status-icon success">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="status-info">
+                                            <h4>服务器状态</h4>
+                                            <p>正常运行中</p>
+                                        </div>
+                                        <div class="status-badge online">在线</div>
+                                    </div>
+                                    <div class="status-item">
+                                        <div class="status-icon success">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        <div class="status-info">
+                                            <h4>数据库连接</h4>
+                                            <p>正常连接</p>
+                                        </div>
+                                        <div class="status-badge online">在线</div>
+                                    </div>
+                                    <div class="status-item">
+                                        <div class="status-icon warning">
+                                            <i class="fas fa-network-wired"></i>
+                                        </div>
+                                        <div class="status-info">
+                                            <h4>网络延迟</h4>
+                                            <p>120ms</p>
+                                        </div>
+                                        <div class="status-badge warning">警告</div>
+                                    </div>
+                                    <div class="status-item">
+                                        <div class="status-icon success">
+                                            <i class="fas fa-server"></i>
+                                        </div>
+                                        <div class="status-info">
+                                            <h4>CPU使用率</h4>
+                                            <p>45%</p>
+                                        </div>
+                                        <div class="status-badge online">正常</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 最近活动日志卡片 -->
+                        <div class="card monitor-card">
+                            <div class="card-header">
+                                <h3>最近活动日志</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="activity-log">
+                                    <div class="activity-item">
+                                        <div class="activity-icon info">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p><strong>系统更新</strong> - 数据缓存已刷新</p>
+                                            <span class="activity-time">2分钟前</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon success">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p><strong>数据同步</strong> - 用户数据已同步完成</p>
+                                            <span class="activity-time">15分钟前</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon warning">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p><strong>警告</strong> - 服务器负载过高</p>
+                                            <span class="activity-time">1小时前</span>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon info">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p><strong>系统通知</strong> - 新功能已上线</p>
+                                            <span class="activity-time">2小时前</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- 用户分析页面 -->
+            <div id="user-analysis-page" class="page">
+                <section class="overview-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-users"></i>
+                        <span>用户分析</span>
+                    </h2>
+                    
+                    <div class="charts-grid">
+                        <!-- 用户增长趋势图 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>用户增长趋势</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="userGrowthChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 用户性别分布 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>用户性别分布</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="genderChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 用户年龄分布 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>用户年龄分布</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="ageChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 用户活跃度分析 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>用户活跃度分析</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="activityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- 销售数据页面 -->
+            <div id="sales-data-page" class="page">
+                <section class="overview-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>销售数据</span>
+                    </h2>
+                    
+                    <div class="charts-grid">
+                        <!-- 销售趋势图 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>销售趋势</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="salesTrendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 产品销售分布 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>产品销售分布</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="productChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 区域销售对比 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>区域销售对比</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="regionSalesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 销售渠道分析 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>销售渠道分析</h3>
+                                <div class="card-actions">
+                                    <button class="card-action-btn" title="全屏查看">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button class="card-action-btn" title="导出数据">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="channelChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- 设置页面 -->
+            <div id="settings-page" class="page">
+                <section class="overview-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-cog"></i>
+                        <span>系统设置</span>
+                    </h2>
+                    
+                    <div class="settings-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>基本设置</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-form">
+                                    <div class="form-group">
+                                        <label for="siteName">网站名称</label>
+                                        <input type="text" id="siteName" class="form-input" value="数据监控中心">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="refreshInterval">数据刷新间隔</label>
+                                        <select id="refreshInterval" class="form-select">
+                                            <option value="5000">5秒</option>
+                                            <option value="10000" selected>10秒</option>
+                                            <option value="30000">30秒</option>
+                                            <option value="60000">1分钟</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="theme">主题设置</label>
+                                        <select id="theme" class="form-select">
+                                            <option value="dark" selected>深色主题</option>
+                                            <option value="light">浅色主题</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>通知设置</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-form">
+                                    <div class="form-group">
+                                        <div class="switch-group">
+                                            <label for="emailNotifications">邮件通知</label>
+                                            <div class="switch">
+                                                <input type="checkbox" id="emailNotifications" checked>
+                                                <span class="slider"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="switch-group">
+                                            <label for="smsNotifications">短信通知</label>
+                                            <div class="switch">
+                                                <input type="checkbox" id="smsNotifications">
+                                                <span class="slider"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="switch-group">
+                                            <label for="pushNotifications">推送通知</label>
+                                            <div class="switch">
+                                                <input type="checkbox" id="pushNotifications" checked>
+                                                <span class="slider"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        
+        <!-- 页脚信息 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>&copy; 2026 数据监控中心. All rights reserved.</p>
+                </div>
+                <div class="footer-right">
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">隐私政策</a>
+                        <a href="#" class="footer-link">使用条款</a>
+                        <a href="#" class="footer-link">联系我们</a>
+                    </div>
+                    <div class="footer-version">版本 2.1.0</div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- 引入粒子背景库 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- 引入JavaScript文件 -->
+    <script src="script.js"></script>
+</body>
+</html>
